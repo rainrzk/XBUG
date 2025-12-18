@@ -1,0 +1,114 @@
+@import './variables.scss';
+
+// 定义颜色变量（如果未在 variables.scss 中定义）
+$purple: #9b59b6; // 紫色
+$pink: #f79dbb;   // 粉色
+$green: #27ae60;  // 绿色
+$yellow: #f1c40f; // 黄色
+$tiffany: #1abc9c; // 蓝绿色
+
+// 按钮颜色混合器
+@mixin colorBtn($color) {
+  background-color: $color;
+  color: #ffffff; // 按钮文字颜色为白色
+  border: none;
+  transition: background-color 0.3s ease;
+
+  &:hover {
+    background-color: lighten($color, 10%); // 悬停时背景颜色变亮
+    color: #ffffff;
+
+    &:before,
+    &:after {
+      background-color: $color;
+    }
+  }
+}
+
+// 按钮样式
+.purple-btn {
+  @include colorBtn($purple);
+}
+
+.pink-btn {
+  @include colorBtn($pink);
+}
+
+.green-btn {
+  @include colorBtn($green);
+}
+
+.yellow-btn {
+  @include colorBtn($yellow);
+}
+
+.tiffany-btn {
+  @include colorBtn($tiffany);
+}
+
+// pan-btn 样式调整
+.pan-btn {
+  font-size: 14px;
+  color: #ffffff;
+  padding: 14px 36px;
+  border-radius: 8px;
+  border: none;
+  outline: none;
+  background-color: $purple; // 背景颜色为紫色
+  position: relative;
+  display: inline-block;
+  transition: background-color 0.6s ease;
+
+  &:hover {
+    background-color: lighten($purple, 10%); // 悬停时背景颜色变亮
+
+    &:before,
+    &:after {
+      width: 100%;
+      transition: width 0.6s ease;
+    }
+  }
+
+  &:before,
+  &:after {
+    content: '';
+    position: absolute;
+    background-color: $pink; // 使用粉色装饰
+    height: 2px;
+    width: 0;
+    transition: width 0.4s ease;
+  }
+
+  &:before {
+    top: 0;
+    right: 0;
+  }
+
+  &:after {
+    left: 0;
+    bottom: 0;
+  }
+}
+
+// 自定义按钮样式调整
+.custom-button {
+  display: inline-block;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  background-color: $purple; // 背景颜色为紫色
+  color: #ffffff; // 文字颜色为白色
+  text-align: center;
+  box-sizing: border-box;
+  outline: 0;
+  margin: 0;
+  padding: 10px 15px;
+  font-size: 14px;
+  border-radius: 4px;
+  border: none;
+  transition: background-color 0.3s ease;
+
+  &:hover {
+    background-color: lighten($purple, 10%); // 悬停时背景颜色变亮
+  }
+}

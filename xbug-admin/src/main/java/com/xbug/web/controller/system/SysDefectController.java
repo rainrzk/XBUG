@@ -1,0 +1,183 @@
+package com.xbug.web.controller.system;
+
+import com.xbug.common.annotation.Log;
+import com.xbug.common.core.controller.BaseController;
+import com.xbug.common.core.domain.AjaxResult;
+import com.xbug.common.core.page.TableDataInfo;
+import com.xbug.common.enums.BusinessType;
+import com.xbug.common.utils.poi.ExcelUtil;
+import com.xbug.system.domain.SysDefect;
+import com.xbug.system.domain.SysDefectLog;
+import com.xbug.system.service.ISysDefectService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletResponse;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * 缺陷Controller
+ * 
+ * @author rzk
+ * @date 2023-11-23
+ */
+@RestController
+@RequestMapping("/system/defect")
+public class SysDefectController extends BaseController
+{
+    @Autowired
+    private ISysDefectService sysDefectService;
+
+    /**
+     * 查询缺陷配置
+     */
+    @PreAuthorize("@ss.hasPermi('system:defect:list')")
+    @GetMapping("/config")
+    public AjaxResult config()
+    {
+        Map<String,Object> ret = new HashMap<>();
+        ret.put("types",sysDefectService.getDefectTypeList());
+        ret.put("states",sysDefectService.getDefectStateList());
+        return success(ret);
+    }
+
+    /**
+     * 查询缺陷列表
+     */
+    @PreAuthorize("@ss.hasPermi('system:defect:list')")
+    @GetMapping("/list")
+    public TableDataInfo list(SysDefect sysDefect)
+    {
+        startPage();
+        List<SysDefect> list = sysDefectService.selectSysDefectList(sysDefect);
+        // 打印查询结果
+        System.out.println("Query Result: " + list);
+        return getDataTable(list);
+    }
+
+    /**
+     * 导出缺陷列表
+     */
+    @PreAuthorize("@ss.hasPermi('system:defect:export')")
+    @Log(title = "缺陷", businessType = BusinessType.EXPORT)
+    @PostMapping("/export")
+    public void export(HttpServletResponse response, SysDefect sysDefect)
+    {
+        List<SysDefect> list = sysDefectService.selectSysDefectList(sysDefect);
+        ExcelUtil<SysDefect> util = new ExcelUtil<SysDefect>(SysDefect.class);
+        util.exportExcel(response, list, "缺陷数据");
+    }
+
+    /**
+     * 获取缺陷详细信息
+     */
+    @PreAuthorize("@ss.hasPermi('system:defect:query')")
+    @GetMapping(value = "/{defectId}")
+    public AjaxResult getInfo(@PathVariable("defectId") Long defectId)
+    {
+        return success(sysDefectService.selectSysDefectByDefectId(defectId));
+    }
+
+    /**
+     * 新增缺陷
+     */
+    @PreAuthorize("@ss.hasPermi('system:defect:add')")
+    @Log(title = "缺陷", businessType = BusinessType.INSERT)
+    @PostMapping
+    public AjaxResult add(@RequestBody SysDefect sysDefect)
+    {
+        return toAjax(sysDefectService.insertSysDefect(sysDefect));
+    }
+
+    /**
+     * 指派
+     */
+    @PreAuthorize("@ss.hasPermi('system:defect:assign')")
+    @Log(title = "指派缺陷", businessType = BusinessType.INSERT)
+    @PostMapping("/{defectId}/assign")
+    public AjaxResult assign(@RequestBody SysDefectLog sysDefectlog)
+    {
+        return success(sysDefectService.assign(sysDefectlog));
+    }
+
+    /**
+     * 驳回
+     */
+    @PreAuthorize("@ss.hasPermi('system:defect:reject')")
+    @Log(title = "驳回缺陷", businessType = BusinessType.INSERT)
+    @PostMapping("/{defectId}/reject")
+    public AjaxResult reject(@RequestBody SysDefectLog sysDefectlog)
+    {
+        return success(sysDefectService.reject(sysDefectlog));
+    }
+
+    /**
+     * 修复
+     */
+    @PreAuthorize("@ss.hasPermi('system:defect:repair')")
+    @Log(title = "修复缺陷", businessType = BusinessType.INSERT)
+    @PostMapping("/{defectId}/repair")
+    public AjaxResult repair(@RequestBody SysDefectLog sysDefectlog)
+    {
+        return success(sysDefectService.repair(sysDefectlog));
+    }
+
+    /**
+     * 通过
+     */
+    @PreAuthorize("@ss.hasPermi('system:defect:pass')")
+    @Log(title = "通过缺陷", businessType = BusinessType.INSERT)
+    @PostMapping("/{defectId}/pass")
+    public AjaxResult pass(@RequestBody SysDefectLog sysDefectlog)
+    {
+        return success(sysDefectService.pass(sysDefectlog));
+    }
+
+    /**
+     * 关闭
+     */
+    @PreAuthorize("@ss.hasPermi('system:defect:close')")
+    @Log(title = "关闭缺陷", businessType = BusinessType.INSERT)
+    @PostMapping("/{defectId}/close")
+    public AjaxResult close(@RequestBody SysDefectLog sysDefectlog)
+    {
+        return success(sysDefectService.close(sysDefectlog));
+    }
+
+    /**
+     * 启动
+     */
+    @PreAuthorize("@ss.hasPermi('system:defect:open')")
+    @Log(title = "关闭缺陷", businessType = BusinessType.INSERT)
+    @PostMapping("/{defectId}/open")
+    public AjaxResult open(@RequestBody SysDefectLog sysDefectlog)
+    {
+        return success(sysDefectService.open(sysDefectlog));
+    }
+
+
+    /**
+     * 修改缺陷
+     */
+    @PreAuthorize("@ss.hasPermi('system:defect:edit')")
+    @Log(title = "缺陷", businessType = BusinessType.UPDATE)
+    @PutMapping
+    public AjaxResult edit(@RequestBody SysDefect sysDefect)
+    {
+        return toAjax(sysDefectService.updateSysDefect(sysDefect));
+    }
+
+    /**
+     * 删除缺陷
+     */
+    @PreAuthorize("@ss.hasPermi('system:defect:remove')")
+    @Log(title = "缺陷", businessType = BusinessType.DELETE)
+	@DeleteMapping("/{defectIds}")
+    public AjaxResult remove(@PathVariable Long[] defectIds)
+    {
+        return toAjax(sysDefectService.deleteSysDefectByDefectIds(defectIds));
+    }
+}

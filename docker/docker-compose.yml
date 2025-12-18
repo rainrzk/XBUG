@@ -1,0 +1,109 @@
+version: '3.8'
+name: xbug
+
+services:
+  # MySQL 服务
+  xbug-mysql:
+    build:
+      context: ..
+      dockerfile: docker/mysql/mysql-dockerfile
+    image: sterralice/xbug-mysql:latest
+    container_name: xbug-mysql
+    restart: always
+    command:
+      --default-authentication-plugin=mysql_native_password
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_general_ci
+      --explicit_defaults_for_timestamp=true
+      --lower_case_table_names=1
+      --interactive_timeout=259200
+      --wait_timeout=259200
+      --max_connections=1000
+    environment:
+      TZ: Asia/Shanghai
+      MYSQL_ROOT_HOST: "%"
+      MYSQL_DATABASE: xbug_platform
+      MYSQL_ROOT_PASSWORD: 123456
+    volumes:
+      - mysql_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+      - "33060:33060"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p123456"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 30s
+    networks:
+      - xbug-network
+
+  # Redis 服务
+  xbug-redis:
+    image: redis:7.2.3
+    container_name: xbug-redis
+    restart: always
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - xbug-network
+
+  # 后端服务
+  xbug-after:
+    build:
+      context: ..
+      dockerfile: docker/after/after-dockerfile
+    image: sterralice/xbug-after:latest
+    container_name: xbug-after
+    restart: always
+    ports:
+      - "8081:2020"  # 确保映射到正确的容器端口
+    environment:
+      SPRING_DATASOURCE_DRUID_MASTER_URL: jdbc:mysql://xbug-mysql:3306/xbug_platform?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&serverTimezone=GMT%2B8
+      SPRING_DATASOURCE_DRUID_MASTER_USERNAME: root
+      SPRING_DATASOURCE_DRUID_MASTER_PASSWORD: 123456
+      SPRING_REDIS_HOST: xbug-redis
+    depends_on:
+      - xbug-mysql
+      - xbug-redis
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:2020/actuator/health"]  # 更新为容器内的实际端口
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - xbug-network
+
+  # 前端服务
+  xbug-front:
+    build:
+      context: ..
+      dockerfile: docker/front/front-dockerfile
+    image: sterralice/xbug-front:latest
+    container_name: xbug-front
+    restart: always
+    ports:
+      - "33332:80"  # 将宿主机的 33332 端口映射到容器的 80 端口
+    environment:
+      VUE_APP_API_URL: http://xbug-after:2020/prod-api/  # 更新为后端服务的容器名和端口
+    depends_on:
+      - xbug-after
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost || exit 0"]
+      interval: 60s
+      timeout: 10s
+      retries: 10
+    networks:
+      - xbug-network
+
+volumes:
+  mysql_data:
+
+networks:
+  xbug-network:
+    driver: bridge

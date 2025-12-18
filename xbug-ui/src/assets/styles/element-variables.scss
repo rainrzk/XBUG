@@ -1,0 +1,41 @@
+/**
+ * 我认为 Element UI 的默认主题颜色太亮，不适合长期使用。
+ * 因此，我修改了默认颜色，您可以根据自己的喜好进行调整。
+ **/
+
+/* 主题颜色 */
+$--color-primary: #8e44ad; // 紫色主色调
+$--color-success: #27ae60; // 成功提示颜色
+$--color-warning: #f39c12; // 警告提示颜色
+$--color-danger: #e74c3c;  // 错误提示颜色
+$--color-info: #f79dbb;    // 信息提示颜色
+
+/* 文本颜色 */
+$--color-text-primary: #ffffff; // 主文本颜色，白色
+$--color-text-regular: rgba(255, 255, 255, 0.8); // 常规文本颜色
+$--color-text-secondary: rgba(255, 255, 255, 0.6); // 次要文本颜色
+$--color-text-placeholder: rgba(255, 255, 255, 0.4); // 占位符文本颜色
+
+/* 边框颜色 */
+$--border-color-base: #3C3C3C;   // 基础边框颜色
+$--border-color-light: #4D4D4D;  // 浅色边框
+$--border-color-lighter: #5E5E5E; // 更浅的边框
+
+/* 背景颜色 */
+$--background-color-base: #1E1E1E; // 基础背景色
+$--background-color-light: #2C2C2E; // 浅背景色
+$--background-color-lighter: #3A3A3C; // 更浅的背景色
+
+/* 按钮字体粗细 */
+$--button-font-weight: 400;
+
+/* 图标字体路径，必需 */
+$--font-path: '~element-ui/lib/theme-chalk/fonts';
+
+@import "~element-ui/packages/theme-chalk/src/index";
+
+// Webpack 的 :export 指令，用于共享变量
+// 参考：https://www.bluematador.com/blog/how-to-share-variables-between-js-and-sass
+:export {
+  theme: $--color-primary;
+}

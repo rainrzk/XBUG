@@ -1,0 +1,13 @@
+FROM mysql:8.0.33
+
+# 设置 MySQL root 用户的默认密码
+ENV MYSQL_ROOT_PASSWORD=123456
+
+# 复制初始化 SQL 脚本到容器中
+COPY docker/mysql/init.sql /docker-entrypoint-initdb.d/init.sql
+
+# 暴露 MySQL 端口
+EXPOSE 3306 33060
+
+# 启动 MySQL 服务
+CMD ["mysqld"]

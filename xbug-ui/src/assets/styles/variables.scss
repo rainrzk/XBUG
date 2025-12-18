@@ -1,0 +1,36 @@
+// 基础颜色
+$purple: #9b59b6;      // 紫色
+$pink: #f79dbb;        // 粉色
+$green: #27ae60;       // 绿色
+$blue: #3498db;        // 蓝色
+$yellow: #f1c40f;      // 黄色
+
+// 默认菜单主题风格
+$base-menu-color: #ffffff;                       // 菜单文字颜色（白色）
+$base-menu-color-active: $purple;                // 活动菜单文字颜色（紫色）
+$base-menu-background: #2c2c2c;                  // 侧边栏背景色（深色）
+$base-logo-title-color: #ffffff;                 // Logo 标题颜色（白色）
+
+$base-menu-light-color: rgba(255, 255, 255, 0.7);      // 菜单浅色文字颜色
+$base-menu-light-background: #1e1e1e;                  // 菜单浅色背景
+$base-logo-light-title-color: #ffffff;                 // Logo 浅色标题颜色
+
+$base-sub-menu-background: #3a3a3a;              // 子菜单背景色
+$base-sub-menu-hover: #454545;                   // 子菜单悬停背景色
+
+$base-sidebar-width: 200px;
+
+// 使用 :export 指令导出变量，供 Webpack 使用
+// 参考：https://www.bluematador.com/blog/how-to-share-variables-between-js-and-sass
+:export {
+  menuColor: $base-menu-color;
+  menuLightColor: $base-menu-light-color;
+  menuColorActive: $base-menu-color-active;
+  menuBackground: $base-menu-background;
+  menuLightBackground: $base-menu-light-background;
+  subMenuBackground: $base-sub-menu-background;
+  subMenuHover: $base-sub-menu-hover;
+  sideBarWidth: $base-sidebar-width;
+  logoTitleColor: $base-logo-title-color;
+  logoLightTitleColor: $base-logo-light-title-color;
+}

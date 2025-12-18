@@ -1,0 +1,38 @@
+.el-page-header {
+  padding-bottom: 20px;
+  margin-bottom: 40px;
+  border-bottom: 1px solid #5E5E5E; /* 调整边框颜色为深色 */
+  background-color: #2C2C2E;        /* 背景颜色为暗色 */
+  color: #FFFFFF;                   /* 文字颜色为白色 */
+}
+
+.el-pagination__editor.el-input .el-input__inner {
+  line-height: 28px;
+  background-color: #2E2E2E;        /* 输入框背景颜色 */
+  color: #FFFFFF;                   /* 输入框文字颜色 */
+  border: 1px solid #444444;        /* 边框颜色 */
+}
+
+.delete-button {
+  color: #FFFFFF !important;
+  background-color: #f79dbb; /* 背景颜色改为粉色 */
+  border-color: #f79dbb;
+}
+
+.delete-button:hover {
+  background: lighten(#f79dbb, 10%); /* 悬停时变亮 */
+  border-color: lighten(#f79dbb, 10%);
+  color: #FFFFFF !important;
+}
+
+.el-dialog__body {
+  padding-top: 0px;
+  background-color: #2C2C2E;        /* 背景颜色为暗色 */
+  color: #FFFFFF;                   /* 文字颜色为白色 */
+}
+
+.el-page-header {
+  margin-bottom: 20px;
+  background-color: #2C2C2E;        /* 背景颜色为暗色 */
+  color: #FFFFFF;                   /* 文字颜色为白色 */
+}

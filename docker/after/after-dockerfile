@@ -1,0 +1,45 @@
+# Stage 1: 构建 Maven 依赖和编译项目
+FROM maven:3.8.5-openjdk-11 AS build
+
+# 设置工作目录
+WORKDIR /usr/local/code
+
+# 复制项目的根目录下的 pom.xml 和所有子模块的 pom.xml
+COPY pom.xml .
+COPY xbug-admin/pom.xml xbug-admin/
+COPY xbug-common/pom.xml xbug-common/
+COPY xbug-framework/pom.xml xbug-framework/
+COPY xbug-generator/pom.xml xbug-generator/
+COPY xbug-quartz/pom.xml xbug-quartz/
+COPY xbug-system/pom.xml xbug-system/
+
+# 下载依赖，利用 Docker 缓存
+# RUN mvn dependency:go-offline -B
+
+# 复制所有源代码
+COPY . .
+
+# 编译项目并跳过测试
+RUN mvn clean install
+
+# 进入 xbug-admin 目录并编译
+WORKDIR /usr/local/code/xbug-admin
+RUN mvn clean install
+
+# Stage 2: 创建运行镜像
+FROM openjdk:11-jre-slim
+
+# 作者信息（推荐使用 LABEL 替代 MAINTAINER）
+LABEL maintainer="rzk@qq.com"
+
+# 创建并设置工作目录
+WORKDIR /home
+
+# 从构建阶段复制构建好的 JAR 文件
+COPY --from=build /usr/local/code/xbug-admin/target/xbug-admin.jar .
+
+# 暴露应用端口（根据实际情况调整）
+EXPOSE 8081
+
+# 启动应用
+ENTRYPOINT ["java", "-jar", "xbug-admin.jar"]

@@ -1,0 +1,82 @@
+package com.xbug.web.controller.system;
+
+import com.alibaba.fastjson2.JSON;
+import com.xbug.common.annotation.Log;
+import com.xbug.common.core.controller.BaseController;
+import com.xbug.common.core.domain.AjaxResult;
+import com.xbug.common.core.page.TableDataInfo;
+import com.xbug.common.enums.BusinessType;
+import com.xbug.common.utils.poi.ExcelUtil;
+import com.xbug.framework.web.service.SysPermissionService;
+import com.xbug.system.domain.SysUserConfig;
+import com.xbug.system.service.ISysUserConfigService;
+import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletResponse;
+import java.util.List;
+
+/**
+ * 用户配置Controller
+ * 
+ * @author rzk
+ * @date 2023-11-16
+ */
+@Log4j2
+@RestController
+@RequestMapping("/system/user-config")
+public class SysUserConfigController extends BaseController
+{
+    @Autowired
+    private SysPermissionService permissionService;
+
+    @Autowired
+    private ISysUserConfigService sysUserConfigService;
+
+    /**
+     * 获取用户配置详细信息
+     */
+    @GetMapping(value = "/{userConfigId}")
+    public AjaxResult getInfo(@PathVariable("userConfigId") Long userConfigId)
+    {
+        return success(sysUserConfigService.selectSysUserConfigByUserConfigId(userConfigId));
+    }
+
+    /**
+     * 新增用户配置
+     */
+    @Log(title = "用户配置", businessType = BusinessType.INSERT)
+    @PostMapping
+    public AjaxResult add(@RequestBody SysUserConfig sysUserConfig)
+    {
+        int ret = sysUserConfigService.insertSysUserConfig(sysUserConfig);
+        // 更新用户权限
+        permissionService.updateRoleAndPermissionOfCurrentUser();
+        return toAjax(ret);
+    }
+
+    /**
+     * 修改用户配置
+     */
+    @Log(title = "用户配置", businessType = BusinessType.UPDATE)
+    @PutMapping
+    public AjaxResult edit(@RequestBody SysUserConfig sysUserConfig)
+    {
+        int ret = sysUserConfigService.updateSysUserConfig(sysUserConfig);
+        // 更新用户权限
+        permissionService.updateRoleAndPermissionOfCurrentUser();
+        return toAjax(ret);
+    }
+
+    /**
+     * 删除用户配置
+     */
+    @Log(title = "用户配置", businessType = BusinessType.DELETE)
+	@DeleteMapping("/{userConfigIds}")
+    public AjaxResult remove(@PathVariable Long[] userConfigIds)
+    {
+        return toAjax(sysUserConfigService.deleteSysUserConfigByUserConfigIds(userConfigIds));
+    }
+}

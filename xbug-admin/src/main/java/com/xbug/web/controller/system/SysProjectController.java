@@ -1,0 +1,155 @@
+package com.xbug.web.controller.system;
+
+import com.xbug.common.annotation.Log;
+import com.xbug.common.core.controller.BaseController;
+import com.xbug.common.core.domain.AjaxResult;
+import com.xbug.common.core.domain.entity.SysRole;
+import com.xbug.common.core.domain.entity.SysUser;
+import com.xbug.common.core.page.TableDataInfo;
+import com.xbug.common.enums.BusinessType;
+import com.xbug.common.utils.MessageUtils;
+import com.xbug.common.utils.poi.ExcelUtil;
+import com.xbug.framework.web.service.SysLoginService;
+import com.xbug.framework.web.service.SysPermissionService;
+import com.xbug.system.domain.SysProject;
+import com.xbug.system.domain.SysUserProject;
+import com.xbug.system.domain.vo.BatchUserRoleVo;
+import com.xbug.system.service.ISysProjectService;
+import com.xbug.system.service.ISysRoleService;
+import com.xbug.system.service.ISysUserProjectService;
+import com.google.common.base.Preconditions;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletResponse;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
+/**
+ * 项目Controller
+ * 
+ * @author rzk
+ * @date 2023-11-13
+ */
+@RestController
+@RequestMapping("/system/project")
+public class SysProjectController extends BaseController
+{
+    @Autowired
+    private SysLoginService loginService;
+
+    @Autowired
+    private ISysProjectService sysProjectService;
+
+    @Autowired
+    private ISysUserProjectService sysUserProjectService;
+
+    @Autowired
+    private ISysRoleService sysRoleService;
+
+    @Autowired
+    private SysPermissionService permissionService;
+    /**
+     * 查询项目列表
+     */
+    @PreAuthorize("@ss.hasPermi('system:project:list')")
+    @GetMapping("/list")
+    public TableDataInfo list(SysProject sysProject)
+    {
+        startPage();
+        List<SysProject> list = sysProjectService.selectSysProjectList(sysProject);
+        return getDataTable(list);
+    }
+
+    /**
+     * 导出项目列表
+     */
+    @PreAuthorize("@ss.hasPermi('system:project:export')")
+    @Log(title = "项目", businessType = BusinessType.EXPORT)
+    @PostMapping("/export")
+    public void export(HttpServletResponse response, SysProject sysProject)
+    {
+        List<SysProject> list = sysProjectService.selectSysProjectList(sysProject);
+        ExcelUtil<SysProject> util = new ExcelUtil<SysProject>(SysProject.class);
+        util.exportExcel(response, list, "项目数据");
+    }
+
+    /**
+     * 导出项目列表
+     */
+    @PreAuthorize("@ss.hasPermi('system:project:list')")
+    @Log(title = "项目", businessType = BusinessType.EXPORT)
+    @GetMapping("/{projectId}/role")
+    public TableDataInfo getRoles(@PathVariable Long projectId)
+    {
+        startPage();
+        SysRole role = new SysRole();
+        role.setIsProjectRole(true);
+        List<SysRole> list = sysRoleService.selectRoleList(role);
+        return getDataTable(list);
+    }
+
+    /**
+     * 获取项目详细信息
+     */
+    @PreAuthorize("@ss.hasPermi('system:project:query')")
+    @GetMapping(value = "/{projectId}")
+    public AjaxResult getInfo(@PathVariable("projectId") Long projectId)
+    {
+        return success(sysProjectService.selectSysProjectByProjectId(projectId));
+    }
+
+    /**
+     * 新增项目
+     */
+    @PreAuthorize("@ss.hasPermi('system:project:add')")
+    @Log(title = "项目", businessType = BusinessType.INSERT)
+    @PostMapping
+    public AjaxResult add(@RequestBody SysProject sysProject)
+    {
+        return toAjax(sysProjectService.insertSysProject(sysProject));
+    }
+
+    @PreAuthorize("@ss.hasPermi('system:project:list')")
+    @Log(title = "项目", businessType = BusinessType.INSERT)
+    @PostMapping("/{projectId}/collect")
+    public AjaxResult collect(@PathVariable Long projectId, @RequestBody SysProject sysProject)
+    {
+        SysUserProject sysUserProject = new SysUserProject();
+        sysUserProject.setUserId(getUserId());
+        sysUserProject.setProjectId(projectId);
+        sysUserProject.setCollect(sysProject.isCollect());
+        return toAjax(sysUserProjectService.updateSysUserProjectByUserIdAndProjectId(sysUserProject));
+    }
+
+
+    /**
+     * 修改项目
+     */
+    @PreAuthorize("@ss.hasPermi('system:project:edit')")
+    @Log(title = "项目", businessType = BusinessType.UPDATE)
+    @PutMapping
+    public AjaxResult edit(@RequestBody SysProject sysProject)
+    {
+        return toAjax(sysProjectService.updateSysProject(sysProject));
+    }
+
+    /**
+     * 删除项目
+     */
+    @PreAuthorize("@ss.hasPermi('system:project:remove')")
+    @Log(title = "项目", businessType = BusinessType.DELETE)
+	@DeleteMapping("/{projectId}")
+    public AjaxResult remove(@PathVariable Long projectId, @RequestBody String password)
+    {
+        Preconditions.checkNotNull(password, MessageUtils.message("user.password.not_empty"));
+        loginService.loginPreCheck(getUsername(),password);
+        // 删除项目
+        int ret = sysProjectService.deleteSysProjectByProjectId(projectId);
+        // 更新用户权限
+        permissionService.updateRoleAndPermissionOfCurrentUser();
+        return toAjax(ret);
+    }
+}

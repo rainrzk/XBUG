@@ -1,0 +1,20 @@
+package com.xbug.system.domain.type;
+
+/**
+ * @Author: rzk
+ * @CreateTime: 2023-11-28 14:01
+ * @Version: 1.0.0
+ * 缺陷状态
+ */
+public enum SysDefectStateEnum {
+    /** 待处理 */
+    PROCESSING,
+    /** 待审核 */
+    AUDIT,
+    /** 已解决 */
+    RESOLVED,
+    /** 已驳回 */
+    REJECTED,
+    /** 已关闭 */
+    CLOSED
+}
